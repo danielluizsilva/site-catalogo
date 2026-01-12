@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>EPI-PRODUTOS</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    width: 350px;
+}
+
+h1 {
+    margin-bottom: 10px;
+}
+
+p {
+    color: #555;
+    margin-bottom: 30px;
+}
+
+button {
+    padding: 12px 25px;
+    font-size: 16px;
+    cursor: pointer;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+button:hover {
+    background: #0056b3;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <!-- Se quiser colocar um logo -->
+    <!-- <img src="imagens/logo.png" width="150"><br><br> -->
+
+    <h1>Catálogo de EPI</h1>
+    <p>Sistema de controle e consulta de produtos</p>
+
+
+    <button onclick="entrar()">Ver produtos</button>
+</div>
+
+<script>
+function entrar(){
+    window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>

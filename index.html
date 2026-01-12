@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Catálogo de Produtos</title>
+
+<style>
+body { font-family: Arial; margin: 100px; }
+button { padding: 10px 30px; cursor: pointer; }
+
+.card {
+  border: 2px solid #000;
+  padding: 10px;
+  margin: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+}
+
+input { width: 140px; padding: 5px; }
+input[disabled] { background: #eee; }
+.admin { color: green; font-weight: bold; }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+
+<body>
+
+<h1>Catálogo de Produtos</h1>
+
+<button onclick="mostrarProdutos()">Produtos</button>
+<button onclick="loginAdmin()">Entrar como administrador</button>
+<span id="status"></span>
+
+<br><br>
+<input
+  type="text"
+  id="busca"
+  placeholder="Buscar produto..."
+  oninput="filtrarProdutos()"
+  style="width:300px; padding:8px;">
+
+<br><br>
+
+<div id="lista"></div>
+<div id="produto"></div>
+
+
+
+<script>
+  const SENHA_ADMIN = "1234"; // <<< MUDE AQUI
+let admin = false;
+
+// STATUS
+function atualizarStatus(){
+  document.getElementById("status").innerHTML =
+    admin ? " 🔓 <span class='admin'>Modo administrador</span>" : " 🔒 Modo leitura";
+}
+
+function loginAdmin(){
+  const senha = prompt("Digite a senha de administrador:");
+  if(senha === SENHA_ADMIN){
+    admin = true;
+    atualizarStatus();
+    alert("Modo administrador ativado");
+  } else {
+    alert("Senha incorreta");
+  }
+}
+const nomes = [
+"Avental de Raspa","Avental Preto de Pvc","Blusa de Frio com Reflexivo EXG","Blusa de Frio com Reflexivo G",
+"Blusa de Frio com Reflexivo GG",
+"Blusa de Frio com Reflexivo M",
+"Blusa de Frio com Reflexivo P",
+"Bota Cano Longo Bico de PVC/EVA 35",
+"Bota Cano Longo Bico de PVC/EVA 36",
+"Bota Cano Longo Bico de PVC/EVA 37",
+"Bota Cano Longo Bico de PVC/EVA 38",
+"Bota Cano Longo Bico de PVC/EVA 39",
+"Bota Cano Longo Bico de PVC/EVA 40",
+"Bota Cano Longo Bico de PVC/EVA 41",
+"Bota Cano Longo Bico de PVC/EVA 42",
+"Bota Cano Longo Bico de PVC/EVA 43",
+"Bota Cano Longo Bico de PVC/EVA 44",
+"Bota de Segurança Bico PVC 36",
+"Bota de Segurança Bico PVC 37",
+"Bota de Segurança Bico PVC 38",
+"Bota de Segurança Bico PVC 39",
+"Bota de Segurança Bico PVC 40",
+"Bota de Segurança Bico PVC 41",
+"Bota de Segurança Bico PVC 42",
+"Bota de Segurança Bico PVC 43",
+"Bota de Segurança Bico PVC 44",
+"Bota de Segurança Bico PVC 45",
+"Bota de Segurança Galocha 36",
+"Bota de Segurança Galocha 37",
+"Bota de Segurança Galocha 38",
+"Bota de Segurança Galocha 39",
+"Bota de Segurança Galocha 40",
+"Bota de Segurança Galocha 41",
+"Bota de Segurança Galocha 42",
+"Bota de Segurança Galocha 43",
+"Bota de Segurança Galocha 44",
+"Bota de Segurança Galocha 45/46",
+"Botina Marluvas Bico de PVC 37",
+"Botina Marluvas Bico de PVC 38",
+"Botina Marluvas Bico de PVC 39",
+"Botina Marluvas Bico de PVC 40",
+"Botina Marluvas Bico de PVC 41",
+"Botina Marluvas Bico de PVC 42",
+"Botina Marluvas Bico de PVC 43",
+"Botina Marluvas Bico de PVC 44",
+"Calça com Reflexivo EXG",
+"Calça com Reflexivo G",
+"Calça com Reflexivo GG",
+"Calça com Reflexivo M",
+"Calça com Reflexivo P",
+"Calça com Reflexivo Sob Medida",
+"Calça com Reflexivo Manga Longa Sob Medida",
+"Camisa Polo Hhtec EXG",
+"Camisa Polo Hhtec G",
+"Camisa Polo Hhtec GG",
+"Camisa Polo Hhtec M",
+"Camisa Polo Hhtec P",
+"Camisa com Reflexivo Manga Longa EXG",
+"Camisa com Reflexivo Manga Longa G",
+"Camisa com Reflexivo Manga Longa GG",
+"Camisa com Reflexivo Manga Longa M",
+"Camisa com Reflexivo Manga Longa P",
+"Camiseta Social Azul  Marinho Feminina EXG",
+"Camiseta Social Azul  Marinho Feminina G",
+"Camiseta Social Azul  Marinho Feminina GG",
+"Camiseta Social Azul  Marinho Feminina M",
+"Camiseta Social Azul Marinho  Feminina P",
+"Camiseta Social Azul  Marinho Feminina PP",
+"Camiseta Social Azul Marinho  Masculina EXG",
+"Camiseta Social Azul  Marinho Masculina G",
+"Camiseta Social Azul Marinho  Masculina GG",
+"Camiseta Social Azul Marinho  Masculina M",
+"Camiseta Social Azul Marinho  Masculina P",
+"Camiseta Social Branca Feminina EXG",
+"Camiseta Social Branca Feminina G",
+"Camiseta Social Branca Feminina GG",
+"Camiseta Social Branca Feminina M",
+"Camiseta Social Branca Feminina P",
+"Camiseta Social Branca Feminina PP",
+"Camiseta Social Branca Masculina EXG",
+"Camiseta Social Branca Masculina G",
+"Camiseta Social Branca Masculina GG",
+"Camiseta Social Branca Masculina M",
+"Camiseta Social Branca Masculina P",
+"Capa de Chuva EXG",
+"Capa de Chuva G",
+"Capa de Chuva GG",
+"Capa de Chuva M",
+"Capa de Chuva P",
+"Capacete 3M",
+"Capa de Brim com Vento",
+"Cinta Ergonômica EXG",
+"Cinta Ergonômica G",
+"Cinta Ergonômica GG",
+"Cinta Ergonômica M",
+"Cinta Ergonômica P",
+"Cinto de Segura",
+"Colete com Reflexivo",
+"Cone PVC de Proteção",
+"Desinfetante Lysoform galão 5 litros",
+"Filtro Quimico para Mascara",
+"Fita Zebrada",
+"Jaqueta com Refletivo EXG",
+"Jaqueta com Refletivo G",
+"Jaqueta com Refletivo GG",
+"Jaqueta com Refletivo M",
+"Jaqueta com Refletivo P",
+"Jaqueta Nylon Preta Adm G",
+"Jaqueta Nylon Preta Adm M",
+"Jaqueta Nylon Preta Adm P",
+"Jaqueta Nylon Preta Adm PP",
+"Jardineira de Saneamento 37",
+"Jardineira de Saneamento 38",
+"Jardineira de Saneamento 39",
+"Jardineira de Saneamento 40",
+"Jardineira de Saneamento 41",
+"Jardineira de Saneamento 42",
+"Jardineira de Saneamento 43",
+"Jardineira de Saneamento 44",
+"Jardineira de Saneamento 45",
+"Joelheira",
+"Jugular",
+"Lente Para Macara  de Solda",
+"Luva Latex EXG",
+"Luva Latex G",
+"Luva Latex GG",
+"Luva Latex M",
+"Luva Latex P",
+"Luva de Manga Longa de Saneamento",
+"Luva De Raspa",
+"Luva De Raspa Manga Longa",
+"Luva Mecânico,quimico, Térmico EXG",
+"Luva Mecânico,quimico, Térmico G",
+"Luva Mecânico,quimico, Térmico GG",
+"Luva Mecânico,quimico, Térmico M",
+"Luva Mecânico,quimico, Térmico P",
+"Luva Para Proteção Contra Agentes Térmico",
+"Luva Para Proteção Orange EXG",
+"Luva Para Proteção Orange G",
+"Luva Para Proteção Orange GG",
+"Luva Para Proteção Orange M",
+"Luva Para Proteção Orange P",
+"Luva Pigmentada",
+"Luva PU EXG",
+"Luva PU G",
+"Luva PU GG",
+"Luva PU M",
+"Luva PU P",
+"Luva Vaqueta",
+"Macacão de Segurança Amarelo G",
+"Macacão de Segurança Amarelo M",
+"Macacão de Segurança Amarelo P",
+"Macacão de Segurança Amarelo EXG",
+"Macacão de Segurança Amarelo GG",
+"Macacão de Segurança Branca G",
+"Macacão de Segurança Branca M",
+"Macacão de Segurança Branca P",
+"Macacão de Segurança Branca EXG",
+"Macacão de Segurança Branca GG",
+"Manga em Raspa",
+"Mascara com Válvula",
+"Máscara de Solda Automática",
+"Máscara Descartavél",
+"Moletom preto M",
+"Óculos de Proteção Amplia Visão",
+"Óculos de Segurança Fume",
+"Óculos de Segurança Incolor",
+"Óculos de Sobrepor Fume",
+"Óculos de Sobrepor Incolor",
+"Perneira",
+"Proteção Para Vergalhão",
+"Protetor Auditivo",
+"Protetor Auricular",
+"Protetor Facial",
+"Protetor solar",
+"Repelente",
+"Respirador Purificados Facial",
+"Sapato EVA 35",
+"Sapato EVA 36",
+"Sapato EVA 37",
+"Sapato EVA 38",
+"Sapato EVA 39",
+"Sapato EVA 40",
+"Sapato EVA 41",
+"Sapato EVA 42",
+"Sapato EVA 43",
+"Sapato Social de Segurança 38",
+"Sapato Social de Segurança 39",
+"Sapato Social de Segurança 40",
+"Sapato Social de Segurança 41",
+"Sapato Social de Segurança 42",
+"Sapato Social de Segurança 43",
+"Sapato Social de Segurança 44",
+"Trava-Queda",
+"Uniforme  Calça NR10 EXG",
+"Uniforme  Calça NR10 G",
+"Uniforme  Calça NR10 GG",
+"Uniforme  Calça NR10 M",
+"Uniforme  Calça NR10 P",
+"Uniforme Camisa NR10 EXG",
+"Uniforme Camisa NR10 G",
+"Uniforme Camisa NR10 GG",
+"Uniforme Camisa NR10 M",
+"Uniforme Camisa NR10 P",
+"Capa de Chuva Nylon Marinho P",
+"Capa de Chuva Nylon Marinho M",
+"Capa de Chuva Nylon Marinho G",
+"Capa de Chuva Nylon Marinho GG",
+"Capa de Chuva Nylon Marinho EXG",
+"Muffler Abafador"
+
+];
+
+const cas = [
+"7392",
+"N.C","N.C","N.C","N.C","N.C","N.C",
+"39347","39347","39347","39347","39347","39347","39347","39347","39347","39347",
+"43377","43377","43377","43377","43377","43377","43377","43377","43377","43377",
+"37455","37455","37455","37455","37455","37455","37455","37455","37455","37455",
+"45611","45611","45611","45611","45611","45611","45611","45611",
+"N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C",
+"N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C",
+"N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C",
+"28191","28191","28191","28191","28191",
+"29638",
+"N.C","N.C","N.C","N.C","N.C","N.C",
+"37977",
+"N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C","N.C",
+"2445","2445","2445","2445","2445","2445","2445","2445","2445",
+"N.C","N.C","N.C",
+"37900","37900","37900","37900","37900",
+"1170",
+"10857",
+"5188",
+"25116","25116","25116","25116","25116",
+"46787",
+"21367","21367","21367","21367","21367",
+"36347",
+"42405","42405","42405","42405","42405",
+"47678",
+"4548","4548","4548","4548","4548",
+"39707","39707","39707","39707","39707",
+"38788",
+"38503",
+"41889",
+"36854",
+"N.C",
+"42919",
+"34653","34653",
+"10344",
+"41987",
+"40186",
+"N.C",
+"41987",
+"19578",
+"47620",
+"N.C","N.C",
+"5758",
+"39213","39213","39213","39213","39213","39213","39213","39213","39213",
+"33698","33698","33698","33698","33698","33698","33698",
+"N.C",
+"48513","48513","48513","48513","48513",
+"48511","48511","48511","48511","48511",
+"28728","28728",
+"33835"
+
+];
+const produtos = nomes.map((nome, i) => ({
+  codigo: "H" + (i + 1),
+  nome,
+  ca: cas[i] || "N.C"
+}));
+
+function obterImagem(codigo){
+  return `imagens/${codigo}.jpg`;
+}
+
+function salvarImagem(codigo, file){
+  if(!admin) {
+    alert("Apenas o administrador pode alterar imagens");
+    return;
+  }
+
+  alert(
+    "⚠️ Para que todos vejam a imagem:\n\n" +
+    "1️⃣ Renomeie a imagem para: " + codigo + ".jpg\n" +
+    "2️⃣ Coloque o arquivo na pasta /imagens\n" +
+    "3️⃣ Recarregue o site"
+  );
+}
+
+function gerarQRCode(codigo){
+  const qrDiv = document.getElementById("qrcode");
+  qrDiv.innerHTML = "";
+  new QRCode(qrDiv, {
+    text: location.origin + location.pathname + "#" + codigo,
+    width: 120,
+    height: 120
+  });
+}
+
+function mostrarProdutos(lista = produtos){
+ document.getElementById("produto").innerHTML = "";
+  document.getElementById("lista").innerHTML = lista.map((p,i)=>`
+    <div class="card" onclick="abrirProduto(${i})">
+      <img src="${obterImagem(p.codigo)}"
+           onerror="this.src='imagens/sem-imagem.jpg'">
+      <div>
+        <b>${p.codigo}</b><br>
+        ${p.nome}
+      </div>
+    </div>
+  `).join("");
+}
+
+function abrirProduto(i){
+  const p = produtos[i];
+
+  const entrada = parseInt(localStorage.getItem(p.codigo+"_entrada")) || 0;
+  const saida   = parseInt(localStorage.getItem(p.codigo+"_saida")) || 0;
+  const minimo  = parseInt(localStorage.getItem(p.codigo+"_minimo")) || 0;
+  const saldo   = entrada - saida;
+
+  document.getElementById("lista").innerHTML = "";
+  document.getElementById("produto").innerHTML = `
+    <h2>${p.nome}</h2>
+
+    <img id="imgProduto"
+     src="${obterImagem(p.codigo)}"
+     onerror="this.src='imagens/sem-imagem.jpg'"
+     width="200"><br><br>
+
+    <label><b>Imagem do produto</b></label><br>
+    <input type="file" accept="image/*"
+      ${admin ? "" : "disabled"}
+      onchange="salvarImagem('${p.codigo}', this.files[0])"><br><br>
+
+    <b>Código:</b> ${p.codigo}<br>
+    <b>CA:</b> ${p.ca}<br><br>
+
+   <label>Entrada:</label><br>
+<input id="entrada" type="number" value="${entrada}"
+  ${admin ? "" : "disabled"}
+  oninput="atualizar('${p.codigo}')"><br><br>
+
+<label>Saída:</label><br>
+<input id="saida" type="number" value="${saida}"
+  ${admin ? "" : "disabled"}
+  oninput="atualizar('${p.codigo}')"><br><br>
+
+    <label>Saldo:</label><br>
+    <input id="saldo" type="number" value="${saldo}" readonly><br><br>
+
+    <label>Estoque mínimo:</label><br>
+    <input id="minimo" type="number" value="${minimo}"
+      ${admin ? "" : "disabled"}
+      oninput="atualizar('${p.codigo}')"><br><br>
+
+    <h3>QR Code do Produto</h3>
+    <div id="qrcode"></div><br>
+
+    <button onclick="mostrarProdutos()">Voltar</button>
+  `;
+
+  gerarQRCode(p.codigo);
+}
+
+function atualizar(codigo){
+  if(!admin){
+    alert("Somente o administrador pode controlar entrada e saída.");
+    abrirProduto(produtos.findIndex(p => p.codigo === codigo));
+    return;
+  }
+
+  const entradaVal = parseInt(entrada.value) || 0;
+  const saidaVal   = parseInt(saida.value) || 0;
+  const saldoVal   = entradaVal - saidaVal;
+
+  localStorage.setItem(codigo+"_entrada", entradaVal);
+  localStorage.setItem(codigo+"_saida", saidaVal);
+
+  document.getElementById("saldo").value = saldoVal;
+}
+function padronizarImagem(codigo, file) {
+  if (!admin) {
+    alert("Apenas o administrador pode alterar imagens");
+    return;
+  }
+
+  const img = new Image();
+  const reader = new FileReader();
+
+  reader.onload = e => img.src = e.target.result;
+
+  img.onload = () => {
+    const TAM = 300;
+    const canvas = document.createElement("canvas");
+    canvas.width = TAM;
+    canvas.height = TAM;
+
+    const ctx = canvas.getContext("2d");
+
+    // fundo branco
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, TAM, TAM);
+
+    // cálculo de corte central
+    const scale = Math.max(TAM / img.width, TAM / img.height);
+    const w = img.width * scale;
+    const h = img.height * scale;
+    const x = (TAM - w) / 2;
+    const y = (TAM - h) / 2;
+
+    ctx.drawImage(img, x, y, w, h);
+
+    // gera imagem final
+    const link = document.createElement("a");
+    link.download = `${codigo}.jpg`;
+    link.href = canvas.toDataURL("image/jpeg", 0.9);
+    link.click();
+
+    alert(
+      `Imagem padronizada com sucesso!\n\n` +
+      `Arquivo gerado: ${codigo}.jpg\n` +
+      `Coloque esse arquivo na pasta /imagens`
+    );
+
+    document.getElementById("imgProduto").src = link.href;
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function filtrarProdutos(){
+  const t = busca.value.toLowerCase();
+  mostrarProdutos(produtos.filter(p =>
+    p.nome.toLowerCase().includes(t) ||
+    p.codigo.toLowerCase().includes(t)
+  ));
+}
+window.onload = () => {
+  atualizarStatus(); // <<< ADICIONADO
+  const hash = location.hash.replace("#", "");
+  const index = produtos.findIndex(p => p.codigo === hash);
+  index !== -1 ? abrirProduto(index) : mostrarProdutos();
+};
+
+
+</script>
